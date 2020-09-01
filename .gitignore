@@ -33,3 +33,5 @@ deps/lua/src/liblua.a
 Makefile.dep
 .vscode/*
 .idea/*
+tests/tmp/
+!.vscode/launch.json
