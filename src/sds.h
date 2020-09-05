@@ -40,6 +40,7 @@ extern const char *SDS_NOINIT;
 #include <stdarg.h>
 #include <stdint.h>
 
+// sds的类型定义
 typedef char *sds;
 
 /* Note: sdshdr5 is never used, we just access the flags byte directly.
@@ -48,9 +49,14 @@ struct __attribute__ ((__packed__)) sdshdr5 {
     unsigned char flags; /* 3 lsb of type, and 5 msb of string length */
     char buf[];
 };
+
+// __attribute__ ((packed)) 属性 让编译器以紧凑模式来分配内存
 struct __attribute__ ((__packed__)) sdshdr8 {
+    // 字符串的长度
     uint8_t len; /* used */
+    // 最大容量
     uint8_t alloc; /* excluding the header and null terminator */
+    // 总是占用一个字节。其中的最低3个bit用来表示header的类型
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     char buf[];
 };
@@ -73,14 +79,18 @@ struct __attribute__ ((__packed__)) sdshdr64 {
     char buf[];
 };
 
+// 五种header类型，flags取值为0~4
 #define SDS_TYPE_5  0
 #define SDS_TYPE_8  1
 #define SDS_TYPE_16 2
 #define SDS_TYPE_32 3
 #define SDS_TYPE_64 4
+ // 类型掩码
 #define SDS_TYPE_MASK 7
 #define SDS_TYPE_BITS 3
+// 获取header头指针
 #define SDS_HDR_VAR(T,s) struct sdshdr##T *sh = (void*)((s)-(sizeof(struct sdshdr##T)));
+// 获取header头指针
 #define SDS_HDR(T,s) ((struct sdshdr##T *)((s)-(sizeof(struct sdshdr##T))))
 #define SDS_TYPE_5_LEN(f) ((f)>>SDS_TYPE_BITS)
 
@@ -215,10 +225,15 @@ static inline void sdssetalloc(sds s, size_t newlen) {
     }
 }
 
+// 创建新的字符串
 sds sdsnewlen(const void *init, size_t initlen);
+// 创建新的字符串
 sds sdsnew(const char *init);
+// 字符串置空
 sds sdsempty(void);
+// 创建复制
 sds sdsdup(const sds s);
+// 释放字符串使用的内存
 void sdsfree(sds s);
 sds sdsgrowzero(sds s, size_t len);
 sds sdscatlen(sds s, const void *t, size_t len);
@@ -238,11 +253,14 @@ sds sdscatprintf(sds s, const char *fmt, ...);
 sds sdscatfmt(sds s, char const *fmt, ...);
 sds sdstrim(sds s, const char *cset);
 void sdsrange(sds s, ssize_t start, ssize_t end);
+// 更新
 void sdsupdatelen(sds s);
+// 清除sds
 void sdsclear(sds s);
 int sdscmp(const sds s1, const sds s2);
 sds *sdssplitlen(const char *s, ssize_t len, const char *sep, int seplen, int *count);
 void sdsfreesplitres(sds *tokens, int count);
+// 字符串大小写转换
 void sdstolower(sds s);
 void sdstoupper(sds s);
 sds sdsfromlonglong(long long value);

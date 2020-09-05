@@ -89,13 +89,19 @@ static inline char sdsReqType(size_t string_size) {
 sds sdsnewlen(const void *init, size_t initlen) {
     void *sh;
     sds s;
+    // 字符串类型判断
     char type = sdsReqType(initlen);
     /* Empty strings are usually created in order to append. Use type 8
      * since type 5 is not good at this. */
+    // SDS_TYPE_5 类型不在使用，使用SDS_TYPE_8
     if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;
+    // 头长度
     int hdrlen = sdsHdrSize(type);
+    // flags
     unsigned char *fp; /* flags pointer. */
-
+    
+    // 分配一段连续的内存空间
+    // 头长度+字符串长度+flags
     sh = s_malloc(hdrlen+initlen+1);
     if (sh == NULL) return NULL;
     if (init==SDS_NOINIT)
@@ -138,8 +144,11 @@ sds sdsnewlen(const void *init, size_t initlen) {
             break;
         }
     }
+
+    // 字符拷贝
     if (initlen && init)
         memcpy(s, init, initlen);
+    // 添加尾字符 '\0'
     s[initlen] = '\0';
     return s;
 }
