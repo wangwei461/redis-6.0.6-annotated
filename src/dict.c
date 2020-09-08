@@ -473,22 +473,32 @@ void dictRelease(dict *d)
     zfree(d);
 }
 
+// 在字典中查询key
 dictEntry *dictFind(dict *d, const void *key)
 {
     dictEntry *he;
     uint64_t h, idx, table;
 
+    // 字典为空
     if (dictSize(d) == 0) return NULL; /* dict is empty */
+    // 正在rehash
     if (dictIsRehashing(d)) _dictRehashStep(d);
+    // 获取key的hash码
     h = dictHashKey(d, key);
+    // 遍历 ht[0]和ht[1]
     for (table = 0; table <= 1; table++) {
+        // 确定 key 的下标
         idx = h & d->ht[table].sizemask;
+        // 对应的值
         he = d->ht[table].table[idx];
         while(he) {
+            // 对比key
             if (key==he->key || dictCompareKeys(d, key, he->key))
                 return he;
+            // 遍历链表中重复的hash key
             he = he->next;
         }
+        // 未找到
         if (!dictIsRehashing(d)) return NULL;
     }
     return NULL;

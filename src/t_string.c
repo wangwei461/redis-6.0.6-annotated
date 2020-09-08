@@ -161,9 +161,11 @@ void psetexCommand(client *c) {
     setGenericCommand(c,OBJ_SET_NO_FLAGS,c->argv[1],c->argv[3],c->argv[2],UNIT_MILLISECONDS,NULL,NULL);
 }
 
+// 查询字符key
 int getGenericCommand(client *c) {
     robj *o;
 
+    // 遍历或答复
     if ((o = lookupKeyReadOrReply(c,c->argv[1],shared.null[c->resp])) == NULL)
         return C_OK;
 
@@ -177,6 +179,7 @@ int getGenericCommand(client *c) {
 }
 
 void getCommand(client *c) {
+    // 通用命令GET
     getGenericCommand(c);
 }
 

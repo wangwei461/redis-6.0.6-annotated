@@ -98,12 +98,16 @@ robj *lookupKey(redisDb *db, robj *key, int flags) {
 robj *lookupKeyReadWithFlags(redisDb *db, robj *key, int flags) {
     robj *val;
 
+    // key 过期
     if (expireIfNeeded(db,key) == 1) {
         /* Key expired. If we are in the context of a master, expireIfNeeded()
          * returns 0 only when the key does not exist at all, so it's safe
          * to return NULL ASAP. */
+        // 主节点
         if (server.masterhost == NULL) {
+            // 失败次数加一
             server.stat_keyspace_misses++;
+            // 键空间通知事件（删除过期键）
             notifyKeyspaceEvent(NOTIFY_KEY_MISS, "keymiss", key, db->id);
             return NULL;
         }
@@ -130,12 +134,14 @@ robj *lookupKeyReadWithFlags(redisDb *db, robj *key, int flags) {
             return NULL;
         }
     }
+    // 键未过期
     val = lookupKey(db,key,flags);
     if (val == NULL) {
         server.stat_keyspace_misses++;
         notifyKeyspaceEvent(NOTIFY_KEY_MISS, "keymiss", key, db->id);
     }
     else
+        // 命中次数加一
         server.stat_keyspace_hits++;
     return val;
 }
@@ -161,7 +167,9 @@ robj *lookupKeyWrite(redisDb *db, robj *key) {
 }
 
 robj *lookupKeyReadOrReply(client *c, robj *key, robj *reply) {
+    // 在 c->db 的数据库查询key
     robj *o = lookupKeyRead(c->db, key);
+    // 写回客户端
     if (!o) addReply(c,reply);
     return o;
 }
@@ -1199,15 +1207,19 @@ void setExpire(client *c, redisDb *db, robj *key, long long when) {
 
 /* Return the expire time of the specified key, or -1 if no expire
  * is associated with this key (i.e. the key is non volatile) */
+// 返回过期key的时间
 long long getExpire(redisDb *db, robj *key) {
     dictEntry *de;
 
     /* No expire? return ASAP */
+    // 过期的字典为空
     if (dictSize(db->expires) == 0 ||
+        // key 未设置过期时间
        (de = dictFind(db->expires,key->ptr)) == NULL) return -1;
 
     /* The entry was found in the expire dict, this means it should also
      * be present in the main dict (safety check). */
+    // 检验key是否在main dict中
     serverAssertWithInfo(NULL,key,dictFind(db->dict,key->ptr) != NULL);
     return dictGetSignedIntegerVal(de);
 }

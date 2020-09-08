@@ -60,6 +60,7 @@
 /* Macros */
 #define AE_NOTUSED(V) ((void) V)
 
+// redis是一个事件驱动程序
 struct aeEventLoop;
 
 /* Types and data structures */
@@ -69,18 +70,26 @@ typedef void aeEventFinalizerProc(struct aeEventLoop *eventLoop, void *clientDat
 typedef void aeBeforeSleepProc(struct aeEventLoop *eventLoop);
 
 /* File event structure */
+// 文件事件 是服务器对套接字操作的抽象
 typedef struct aeFileEvent {
+    // 事件类型
     int mask; /* one of AE_(READABLE|WRITABLE|BARRIER) */
+    // 读事件执行器
     aeFileProc *rfileProc;
+    // 写事件执行器
     aeFileProc *wfileProc;
     void *clientData;
 } aeFileEvent;
 
 /* Time event structure */
+// 时间事件 对定时操作的抽象
 typedef struct aeTimeEvent {
+    // 唯一Id
     long long id; /* time event identifier. */
+    // 事件发生的时间
     long when_sec; /* seconds */
     long when_ms; /* milliseconds */
+    // 事件执行器
     aeTimeProc *timeProc;
     aeEventFinalizerProc *finalizerProc;
     void *clientData;
@@ -91,21 +100,32 @@ typedef struct aeTimeEvent {
 } aeTimeEvent;
 
 /* A fired event */
+// 触发的事件
 typedef struct aeFiredEvent {
+    // 文件描述符
     int fd;
+    // 事件类型
     int mask;
 } aeFiredEvent;
 
 /* State of an event based program */
+// 事件结构
 typedef struct aeEventLoop {
+    // 当前注册的最高文件描述符
     int maxfd;   /* highest file descriptor currently registered */
+    // 跟踪的文件描述符的最大数量
     int setsize; /* max number of file descriptors tracked */
+    // 时间事件Id
     long long timeEventNextId;
+    // 用于检测系统时钟偏差
     time_t lastTime;     /* Used to detect system clock skew */
+    // 已注册事件
     aeFileEvent *events; /* Registered events */
+    // 触发的事件
     aeFiredEvent *fired; /* Fired events */
     aeTimeEvent *timeEventHead;
     int stop;
+    // 它用于轮询特定于API的数据
     void *apidata; /* This is used for polling API specific data */
     aeBeforeSleepProc *beforesleep;
     aeBeforeSleepProc *aftersleep;

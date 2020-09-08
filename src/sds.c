@@ -210,6 +210,8 @@ void sdsclear(sds s) {
  *
  * Note: this does not change the *length* of the sds string as returned
  * by sdslen(), but only the free buffer space we have. */
+
+// 字符串扩容
 sds sdsMakeRoomFor(sds s, size_t addlen) {
     void *sh, *newsh;
     size_t avail = sdsavail(s);
@@ -223,9 +225,12 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     len = sdslen(s);
     sh = (char*)s-sdsHdrSize(oldtype);
     newlen = (len+addlen);
+    // 字符串长度小于1M
     if (newlen < SDS_MAX_PREALLOC)
+        // 长度设为2倍
         newlen *= 2;
     else
+        // 长度加1M
         newlen += SDS_MAX_PREALLOC;
 
     type = sdsReqType(newlen);

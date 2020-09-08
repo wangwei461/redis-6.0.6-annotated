@@ -66,6 +66,7 @@ typedef struct ConnectionType {
     ssize_t (*sync_readline)(struct connection *conn, char *ptr, ssize_t size, long long timeout);
 } ConnectionType;
 
+// 连接结构
 struct connection {
     ConnectionType *type;
     ConnectionState state;

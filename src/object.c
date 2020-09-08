@@ -39,10 +39,14 @@
 /* ===================== Creation and parsing of objects ==================== */
 
 robj *createObject(int type, void *ptr) {
+    // 分配内存
     robj *o = zmalloc(sizeof(*o));
+    // 对象类型
     o->type = type;
+    // 对象编码
     o->encoding = OBJ_ENCODING_RAW;
     o->ptr = ptr;
+    // 对象引用计数
     o->refcount = 1;
 
     /* Set the LRU to the current lruclock (minutes resolution), or
